@@ -4,36 +4,36 @@
 const Model = use('Model')
 
 /** @type {import('@adonisjs/framework/src/Hash')} */
-const Hash = use('Hash')
+
 
 class User extends Model {
   static boot () {
     super.boot()
 
-    /**
-     * A hook to hash the user password before saving
-     * it to the database.
-     */
-    this.addHook('beforeSave', async (userInstance) => {
-      if (userInstance.dirty.password) {
-        userInstance.password = await Hash.make(userInstance.password)
-      }
-    })
+    //Hooks/UserHook
+
+    //hash password before create and before update
+    this.addHook('beforeSave', 'UserHook.hashPassword')
+
+    //send email just after create
+    this.addHook('afterCreate', 'UserHook.sendValidationEmail')
   }
 
-  /**
-   * A relationship on tokens is required for auth to
-   * work. Since features like `refreshTokens` or
-   * `rememberToken` will be saved inside the
-   * tokens table.
-   *
-   * @method tokens
-   *
-   * @return {Object}
-   */
+  static get hidden () {
+    return ['password']
+  }
+
+
   tokens () {
     return this.hasMany('App/Models/Token')
   }
+
+  establishments () {
+    return this.hasMany('App/Models/Establishment')
+  }
+
+
+
 }
 
 module.exports = User
